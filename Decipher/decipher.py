@@ -17,9 +17,9 @@ as a single letter.
 Turn Order: On their turn, players may perform one of two actions:
     1) Pick a number between 1 and 20. The opponent will provide the
        corresponding letter for that number.
-
+       
     2) Guess their opponent's five letter word.
-
+    
 Win Condition: Player successfully guess their opponent's 5 letter word.
 '''
 
@@ -28,11 +28,16 @@ import string
 
 
 class Player(object):
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, number):
+        self.number = number
+        self.name = ''
         self.word = ''
         self.remaining = {}
         self.received = {}
+
+    def SetName(self):
+        name = input("What's your name? ")
+        self.name = name
 
     def SetWord(self):
         validWord = False
@@ -49,20 +54,18 @@ class Player(object):
 
                 count = {}
                 for letter in word:
-                    if letter in count:
-                        count[letter] += 1
-                    else:
-                        count[letter] = 1
+                    count[letter] = count.get(letter, 0) + 1
 
+                # Using two loops displays multiple repeated letters in a cleaner way.
                 for letter in count:
                     if count[letter] > 1:
                         validWord = False
-                        print('Cannot repeat letters: ' + letter)
+                        print('Cannot repeat letters: ' + letter.upper())
 
         self.word = word.upper()
         print('Your word is ' + self.word)
 
-    def SetRemaining(self):
+    def SetRemainingBoard(self):
         temp = list(string.ascii_uppercase)
 
         for letter in self.word:
@@ -76,12 +79,10 @@ class Player(object):
             temp[temp.index('X')] = 'XY'
             temp.remove('Y')
 
-        self.remaining = {}
         for i in range(0, 20):
             self.remaining[i + 1] = temp[i]
 
-    def SetReceived(self):
-        self.received = {}
+    def SetReceivedBoard(self):
         for i in range(0, 20):
             self.received[i + 1] = '_'
 
@@ -152,11 +153,17 @@ def GuessWord(opponent, guess):
         return False
 
 
+def LeaveGame():
+    quit()
+
+
 def Turn(player, opponent):
     while True:
         move = input('Input a number or a guess. ')
 
-        if move.isnumeric():
+        if move == "exit()" or move == "quit()":
+            LeaveGame()
+        elif move.isnumeric():
             move = int(move)
             if move >= 1 and move <= 20:
                 GetLetter(player, opponent, move)
@@ -167,14 +174,20 @@ def Turn(player, opponent):
         print('Invalid input.')
 
 
-def PlayGame(p1, p2):
+def PlayGame():
+    print('PLAYER 1')
+    p1 = Player(1)
+    p1.SetName()
     p1.SetWord()
-    p1.SetRemaining()
-    p1.SetReceived()
+    p1.SetRemainingBoard()
+    p1.SetReceivedBoard()
 
+    print('PLAYER 2')
+    p2 = Player(2)
+    p2.SetName()
     p2.SetWord()
-    p2.SetRemaining()
-    p2.SetReceived()
+    p2.SetRemainingBoard()
+    p2.SetReceivedBoard()
 
     gameOver = False
     while not gameOver:
@@ -193,11 +206,5 @@ def PlayGame(p1, p2):
                 print(p2.name + ' wins!')
 
 
-# Setup game
-name1 = input('Player 1 name: ')
-p1 = Player(name1)
-
-name2 = input('Player 2 name: ')
-p2 = Player(name2)
-
-PlayGame(p1, p2)
+if __name__ == '__main__':
+    PlayGame()
