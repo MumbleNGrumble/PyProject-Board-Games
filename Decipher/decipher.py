@@ -41,7 +41,7 @@ class Player(object):
 
     def InputWord(self):
         word = input(
-            'Please provide a 5 letter word. Letters cannot be repeated. ')
+            'Please provide a 5 letter word. Letters cannot be repeated. XY is considered one letter and cannot be used at the same time. ')
         self.word = word.upper()
 
     def SetRemainingBoard(self):
@@ -111,6 +111,9 @@ class Player(object):
 
         # Checking for an empty string first so the 5 letter instruction doesn't get repeated unnecessarily.
         if word == '':
+            valid = False
+        elif 'XY' in word.upper():
+            print('X and Y is considered one letter and cannot be used at the same time.')
             valid = False
         elif len(word) != 5:
             print('Word must be exactly 5 letters.')
