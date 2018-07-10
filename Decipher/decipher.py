@@ -17,9 +17,9 @@ as a single letter.
 Turn Order: On their turn, players may perform one of two actions:
     1) Pick a number between 1 and 20. The opponent will provide the
        corresponding letter for that number.
-       
+
     2) Guess their opponent's five letter word.
-    
+
 Win Condition: Player successfully guess their opponent's 5 letter word.
 '''
 
@@ -35,35 +35,14 @@ class Player(object):
         self.remaining = {}
         self.received = {}
 
-    def SetName(self):
+    def InputName(self):
         name = input("What's your name? ")
         self.name = name
 
-    def SetWord(self):
-        validWord = False
-        while not validWord:
-            word = input(
-                'Please provide a 5 letter word. Letters cannot be repeated. ')
-
-            if not word.isalpha():
-                print('Must use letters only.')
-            elif len(word) != 5:
-                print('Word must be exactly 5 letters.')
-            else:
-                validWord = True
-
-                count = {}
-                for letter in word:
-                    count[letter] = count.get(letter, 0) + 1
-
-                # Using two loops displays multiple repeated letters in a cleaner way.
-                for letter in count:
-                    if count[letter] > 1:
-                        validWord = False
-                        print('Cannot repeat letters: ' + letter.upper())
-
+    def InputWord(self):
+        word = input(
+            'Please provide a 5 letter word. Letters cannot be repeated. ')
         self.word = word.upper()
-        print('Your word is ' + self.word)
 
     def SetRemainingBoard(self):
         temp = list(string.ascii_uppercase)
@@ -127,6 +106,31 @@ class Player(object):
                 print(str(i) + ': ' + self.received[i] + ' | ', end='')
         print()
 
+    def ValidWord(self, word):
+        valid = True
+
+        # Checking for an empty string first so the 5 letter instruction doesn't get repeated unnecessarily.
+        if word == '':
+            valid = False
+        elif len(word) != 5:
+            print('Word must be exactly 5 letters.')
+            valid = False
+        elif not word.isalpha():
+            print('Must use letters only.')
+            valid = False
+        else:
+            count = {}
+            for letter in word:
+                count[letter] = count.get(letter, 0) + 1
+
+            # Using two loops displays multiple repeated letters in a cleaner format.
+            for letter in count:
+                if count[letter] > 1:
+                    print('Cannot repeat letters: ' + letter.upper())
+                    valid = False
+
+        return valid
+
     def WordsGuessed(self):
         pass
 
@@ -177,15 +181,23 @@ def Turn(player, opponent):
 def PlayGame():
     print('PLAYER 1')
     p1 = Player(1)
-    p1.SetName()
-    p1.SetWord()
+    p1.InputName()
+
+    while not p1.ValidWord(p1.word):
+        p1.InputWord()
+    print('Your word is ' + p1.word)
+
     p1.SetRemainingBoard()
     p1.SetReceivedBoard()
 
     print('PLAYER 2')
     p2 = Player(2)
-    p2.SetName()
-    p2.SetWord()
+    p2.InputName()
+
+    while not p2.ValidWord(p2.word):
+        p2.InputWord()
+    print('Your word is ' + p2.word)
+
     p2.SetRemainingBoard()
     p2.SetReceivedBoard()
 
