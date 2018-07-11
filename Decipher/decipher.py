@@ -139,16 +139,9 @@ class Player(object):
 
 
 def GetLetter(player, opponent, move):
-    num = move
-
-    validMove = False
-    while not validMove:
-        if opponent.remaining[num] != '_':
-            player.received[num] = opponent.remaining[num]
-            opponent.remaining[num] = '_'
-            validMove = True
-        else:
-            num = input('Already got letter. Pick another number: ')
+    player.received[move] = opponent.remaining[move]
+    opponent.remaining[move] = '_'
+    print('Received {}: {}'.format(move, player.received[move]))
 
 
 def GuessWord(opponent, guess):
@@ -156,8 +149,12 @@ def GuessWord(opponent, guess):
         print('Correct!')
         return True
     else:
-        print('Nope.')
+        print("Incorrect. {} is not {}'s word.".format(guess, opponent.name))
         return False
+
+
+def InputMove():
+    return input('Input a number between 1 and 20 or a 5 letter guess. ')
 
 
 def LeaveGame():
@@ -166,19 +163,37 @@ def LeaveGame():
 
 def Turn(player, opponent):
     while True:
-        move = input('Input a number or a guess. ')
+        move = InputMove()
 
-        if move == "exit()" or move == "quit()":
-            LeaveGame()
-        elif move.isnumeric():
-            move = int(move)
-            if move >= 1 and move <= 20:
-                GetLetter(player, opponent, move)
+        if not ValidMove(player, opponent, move):
+            print('Invalid move.')
+        else:
+            break
+
+    if move.isnumeric():
+        GetLetter(player, opponent, int(move))
+        return False
+    else:
+        return GuessWord(opponent, move)
+
+
+def ValidMove(player, opponent, move):
+    if move == "exit()" or move == "quit()":
+        return LeaveGame()
+    elif move.isnumeric():
+        move = int(move)
+        if move >= 1 and move <= 20:
+            if player.received[move] == '_' and opponent.remaining[move] != '_':
+                return True
+            elif player.received[move] != '_' and opponent.remaining[move] == '_':
+                print('Already have that letter. Choose another number.')
                 return False
-        elif move.isalpha() and len(move) == 5:
-            return GuessWord(opponent, move)
-
-        print('Invalid input.')
+        else:
+            return False
+    elif move.isalpha() and len(move) == 5:
+        return True
+    else:
+        return False
 
 
 def PlayGame():
