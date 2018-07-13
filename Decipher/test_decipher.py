@@ -6,6 +6,7 @@ class TestDecipher(unittest.TestCase):
 
     def setUp(self):
         self.p1 = decipher.Player(1)
+        self.p2 = decipher.Player(2)
 
     def test_SetRemainingBoard(self):
         self.p1.word = 'GAMES'
@@ -49,6 +50,87 @@ class TestDecipher(unittest.TestCase):
             'EPOXY'), 'X and Y is considered one letter and cannot be used at the same time.')
         self.assertTrue(self.p1.ValidWord('ASDFG'),
                         '5 letter word. Letters cannot be repeated')
+
+    def test_GetLetter(self):
+        self.p1.received = {1: '_', 2: '_', 3: '_', 4: '_', 5: '_',
+                            6: '_', 7: '_', 8: '_', 9: '_', 10: '_',
+                            11: '_', 12: '_', 13: '_', 14: '_', 15: '_',
+                            16: '_', 17: '_', 18: '_', 19: '_', 20: '_'}
+        self.p2.remaining = {1: 'B', 2: 'C', 3: 'D', 4: 'F', 5: 'H',
+                             6: 'I', 7: 'J', 8: 'K', 9: 'L', 10: 'N',
+                             11: 'O', 12: 'P', 13: 'Q', 14: 'R', 15: 'T',
+                             16: 'U', 17: 'V', 18: 'W', 19: 'XY', 20: 'Z'}
+
+        decipher.GetLetter(self.p1, self.p2, 1)
+        self.assertEqual(self.p1.received, {1: 'B', 2: '_', 3: '_', 4: '_', 5: '_',
+                                            6: '_', 7: '_', 8: '_', 9: '_', 10: '_',
+                                            11: '_', 12: '_', 13: '_', 14: '_', 15: '_',
+                                            16: '_', 17: '_', 18: '_', 19: '_', 20: '_'},
+                         'First letter (B) recieved improperly.')
+        self.assertEqual(self.p2.remaining, {1: '_', 2: 'C', 3: 'D', 4: 'F', 5: 'H',
+                                             6: 'I', 7: 'J', 8: 'K', 9: 'L', 10: 'N',
+                                             11: 'O', 12: 'P', 13: 'Q', 14: 'R', 15: 'T',
+                                             16: 'U', 17: 'V', 18: 'W', 19: 'XY', 20: 'Z'},
+                         'First letter (B) transferred improperly.')
+
+        decipher.GetLetter(self.p1, self.p2, 15)
+        self.assertEqual(self.p1.received, {1: 'B', 2: '_', 3: '_', 4: '_', 5: '_',
+                                            6: '_', 7: '_', 8: '_', 9: '_', 10: '_',
+                                            11: '_', 12: '_', 13: '_', 14: '_', 15: 'T',
+                                            16: '_', 17: '_', 18: '_', 19: '_', 20: '_'},
+                         'Second letter (T) recieved improperly.')
+        self.assertEqual(self.p2.remaining, {1: '_', 2: 'C', 3: 'D', 4: 'F', 5: 'H',
+                                             6: 'I', 7: 'J', 8: 'K', 9: 'L', 10: 'N',
+                                             11: 'O', 12: 'P', 13: 'Q', 14: 'R', 15: '_',
+                                             16: 'U', 17: 'V', 18: 'W', 19: 'XY', 20: 'Z'},
+                         'Second letter (T) transferred improperly.')
+
+        decipher.GetLetter(self.p1, self.p2, 19)
+        self.assertEqual(self.p1.received, {1: 'B', 2: '_', 3: '_', 4: '_', 5: '_',
+                                            6: '_', 7: '_', 8: '_', 9: '_', 10: '_',
+                                            11: '_', 12: '_', 13: '_', 14: '_', 15: 'T',
+                                            16: '_', 17: '_', 18: '_', 19: 'XY', 20: '_'},
+                         'Third letter (XY) recieved improperly.')
+        self.assertEqual(self.p2.remaining, {1: '_', 2: 'C', 3: 'D', 4: 'F', 5: 'H',
+                                             6: 'I', 7: 'J', 8: 'K', 9: 'L', 10: 'N',
+                                             11: 'O', 12: 'P', 13: 'Q', 14: 'R', 15: '_',
+                                             16: 'U', 17: 'V', 18: 'W', 19: '_', 20: 'Z'},
+                         'Third letter (XY) transferred improperly.')
+
+    def test_GuessWord(self):
+        self.p1.word = 'GAMES'
+        self.p2.word = 'FIXED'
+
+        self.assertTrue(decipher.GuessWord(self.p1, 'GAMES'),
+                        'Correct guess was provided.')
+        self.assertTrue(decipher.GuessWord(self.p2, 'FIXED'),
+                        'Correct guess was provided.')
+
+        self.assertFalse(decipher.GuessWord(self.p1, 'WRONG'),
+                         'Incorrect guess was provided.')
+        self.assertFalse(decipher.GuessWord(self.p2, 'WRONG'),
+                         'Incorrect guess was provided.')
+
+    def test_ValidMove(self):
+        self.p1.received = {1: 'B', 2: '_', 3: '_', 4: '_', 5: '_',
+                            6: '_', 7: '_', 8: 'K', 9: '_', 10: '_',
+                            11: '_', 12: 'P', 13: '_', 14: '_', 15: '_',
+                            16: 'U', 17: '_', 18: '_', 19: '_', 20: 'Z'}
+        self.p2.remaining = {1: '_', 2: 'C', 3: 'D', 4: 'F', 5: 'H',
+                             6: 'I', 7: 'J', 8: '_', 9: 'L', 10: 'N',
+                             11: 'O', 12: '_', 13: 'Q', 14: 'R', 15: 'T',
+                             16: '_', 17: 'V', 18: 'W', 19: 'XY', 20: '_'}
+
+        moves = ['3', '9', '11', '19', 'VALID', 'ASDFG']
+        for move in moves:
+            self.assertTrue(decipher.ValidMove(self.p1, self.p2, move),
+                            'Valid number or guess was provided.')
+
+        moves = ['1', '8', '12', '20', '21',
+                 '0', '-1', 'A', 'AS', 'ASD', 'ASDF']
+        for move in moves:
+            self.assertFalse(decipher.ValidMove(self.p1, self.p2, move),
+                             'Invalid number or guess was provided.')
 
 
 if __name__ == '__main__':
