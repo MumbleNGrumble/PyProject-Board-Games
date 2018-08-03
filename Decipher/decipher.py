@@ -138,6 +138,46 @@ class Player(object):
         pass
 
 
+class Computer(Player):
+    def __init__(self):
+        # Set up iniital guessing board.
+        self.lookup = list(string.ascii_uppercase)
+        self.lookup[23] = 'XY'
+        self.lookup.remove('Y')
+        self.potential = self.lookup.copy()
+        self.deduction = {}
+
+        for i, letter in enumerate(self.lookup):
+            if i < 20:
+                self.deduction[i + 1] = {'Min': letter,
+                                         'Max': self.lookup[i + 5], 'Known': False}
+
+    def SetKnown(self, num):
+        if self.deduction[num]['Min'] == self.deduction[num]['Max']:
+            self.deduction[num]['Known'] = True
+            self.potential.remove(self.deduction[num]['Min'])
+
+    def SetReceivedLetter(self, num, received):
+        self.deduction[num] = {'Min': received, 'Max': received, 'Known': True}
+        self.potential.remove(received)
+
+    def UpdateMax(self, num):
+        if not self.deduction[num]['Known'] and num != 20:
+            nextMaxLetter = self.deduction[num + 1]['Max']
+            maxIndex = self.lookup.index(nextMaxLetter) - 1
+            self.deduction[num]['Max'] = self.lookup[maxIndex]
+
+            self.SetKnown(num)
+
+    def UpdateMin(self, num):
+        if not self.deduction[num]['Known']:
+            prevMinLetter = self.deduction[num - 1]['Min']
+            minIndex = self.lookup.index(prevMinLetter) + 1
+            self.deduction[num]['Min'] = self.lookup[minIndex]
+
+            self.SetKnown(num)
+
+
 def GetLetter(player, opponent, move):
     player.received[move] = opponent.remaining[move]
     opponent.remaining[move] = '_'
